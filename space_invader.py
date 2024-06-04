@@ -1,235 +1,253 @@
-
 import pygame
 import time
-import random
-from pygame.locals import *
 pygame.init()
-screen=pygame.display.set_mode((1000,700))
-pygame.display.set_caption('Spac Vadré')
-black=(0,0,0)
-white=(255,255,255)
-red=(255,0,0)
-green=(0,255,0)
-blue=(0,0,255)
-img1=pygame.image.load("vaderb2.png")
-img2=pygame.image.load("vaderb2.png")
-img3=pygame.image.load("vaderc1.png")
-img=pygame.image.load("space.png")
-
-##img = pygame.transform.scale(img,(100,100))
-##img4=pygame.image.load('bullet.png')
-##img4 = pygame.transform.scale(img4,(10,35))
-##img5=pygame.image.load('shoot.png')
-##img5 = pygame.transform.scale(img5,(10,35))
-
+screen=pygame.display.set_mode((900,700))
+pygame.display.set_caption('space invaders')
+Ship1=pygame.image.load('Ship.png')
+Alien1=pygame.image.load('Alien1.png')
+Alien2=pygame.image.load('Alien2.png')
+Alien3=pygame.image.load('Alien3.png')
+Bullets=pygame.image.load('Bullet.png')
 class Character:
-    def __init__(self,x,y,w,h,img):
-        self.x= x
-        self.y =y
-        self.w=w
-        self.h=h
-        self.image=img
-    def draw (self):
-        self.image = pygame.transform.scale(self.image,(self.w,self.h))
-        screen.blit(self.image,(self.x,self.y))
-                    
+    def __init__(self,x,y,image,height,width):
+        self.x=x
+        self.y=y
+        self.image=image
+        self.height=height
+        self.width=width
 class Alien(Character):
-    def __init__(self,x,y,w,h,img,row):
-        super().__init__(x,y,w,h,img)
-        self.min = self.x-5
-        self.max = self.x+45
-        self.speed  = random.randint(1,3)
-        self.row = row   
-    def move(self):
-        self.x += self.speed
-        if self.x < self.min:
-            self.speed = random.randint(1,3)
-        if self.x >self.max:
-            self.speed = - random.randint(1,3)
-##        if movex == 'right':
-##            self.x += 1
-##        if movex == 'left':
-##            self.x -= 1
-    def movedown(self,movey,row):
-        #print(self.y,movey,row-self.row)
-        self.y = movey * (row-self.row)
-step =1        
+    def __init__(self,x,y,image,height,width,level):
+        super().__init__(x,y,image,height,width)
+        self.x=x
+        self.y=y
+        self.image=pygame.transform.scale(Alien1,(self.width,self.height))
+        self.height=height
+        self.width=width
+        self.level=level
+        self.direction = 1
+        self.count = 0
+    def draw(self):
+        screen.blit(self.image,(self.x,self.y))
+    def move_alien(self,movex,movey):
+        if movex=='right':
+            self.x=self.x+1
+        if movex=='left':
+            self.x=self.x-1
+        self.y=movey+self.level
+    def move_update(self):
+        self.x += self.direction
+        self.count += 1
+        if abs(self.count) > 75:
+            self.direction *= -1
+            self.count *= self.direction
+            self.y += 20
+class PlayerShip(Character):
+    def __init__(self,x,y,image,height,width):
+        super().__init__(x,y,image,height,width)
+        self.x=x
+        self.y=y
+        self.image=pygame.transform.scale(Ship1,(self.width,self.height))
+        self.height=height
+        self.width=width
+        self.speed=0
+    def draw(self):
+        screen.blit(self.image,(self.x,self.y))
+    def move_ship(self):
+        self.x=self.x+self.speed
+class Bullet(Character):
+    def __init__(self,x,y,image,height,width):
+        super().__init__(x,y,image,height,width)
+        self.x=x
+        self.y=y
+        self.image=pygame.transform.scale(Bullets,(self.width,self.height))
+        self.height=height
+        self.width=width
+    def draw(self):
+        screen.blit(self.image,(self.x,self.y))
+    def bullet_move(self):
+        self.y=self.y-5
+class SuperAlien(Character):
+    def __init__(self,x,y,image,height,width):
+        super().__init__(x,y,image,height,width)
+        self.x=x
+        self.y=y
+        self.image=pygame.transform.scale(Alien2,(self.width,self.height))
+        self.height=height
+        self.width=width
+        self.speed=1
+        self.count=3
+    def draw(self):
+        screen.blit(self.image,(self.x,self.y))
+    def move_alien(self):
+        self.x=self.x+self.speed
+        if self.x>=900:
+            self.y=self.y+50
+            self.speed=-self.speed
+        if self.x<=0:
+            self.y=self.y+50
+            self.speed=-self.speed
+class ShooterAlien(SuperAlien):
+    def __init__(self,x,y,image,height,width):
+        super().__init__(x,y,image,height,width)
+        self.x=x
+        self.y=y
+        self.image=pygame.transform.scale(Alien3,(self.width,self.height))
+        self.height=height
+        self.width=width
+        self.count = 0
+        self.direction = 1
         
+ 
+    def draw(self):
+        screen.blit(self.image,(self.x,self.y))
+    def move_update(self):
+        self.x += self.direction
+        self.count += 1
+        if abs(self.count) > 225:
+            self.direction *= -1
+            self.count *= self.direction
+            self.y += 20
         
-##class player:
-##    def __init__(self,img):
-##        self.x=500
-##        self.y=600
-##        self.img=img
-##        self.movex = 0
-##    def draw(self):
-##        screen.blit(self.img,(self.x,self.y))
-##    def move(self):
-##        self.x += self.movex
-##        
-##class bullet:
-##    def __init__(self, x,y,img, m):
-##        self.x= x
-##        self.y= y
-##        self.img=img
-##        self.m =m
-##    def draw(self):
-##        screen.blit(self.img,(self.x+43,self.y))
-##    def move(self):
-##        if self.m == 'up':
-##            self.y -= 1
-##        if self.m == 'down':
-##            self.y += 1
-invader1=[]
-invader2=[]
-invader3=[]
-bullet_list=[]
-row =2
-
-for i in range(0,1000,100):
-    invader1.append(Alien(i,20,60,60,img1,row))
-
-##    invader2.append(invaders(i,80,img2))
-##    invader3.append(invaders(i,140,img3))
-
-##shoot1=random.choice(invader1)
-##shoot2=random.choice(invader2)
-##shoot3=random.choice(invader3)
-     
-signal =0
-movey=50
-
-##movex1=movex2=movex3='left'
-##movey1=20
-##movey2=80
-##movey3=140
-##space=player(img)
-
-clock = pygame.time.Clock()
-start = time.time()
-
-
+SuperAlienList=[]   
+Alienlist=[]
+bulletlist=[]
+Alienlist2=[]
+for j in range(0,10,1):
+    for w in range(0,5,1):
+        alien2=ShooterAlien(j*85+50,w*55+35,Alien,45,45)
+        Alienlist2.append(alien2)
+for n in range(0,10,1):
+    for b in range(0,5,1):
+        alien=Alien(n*85+50,b*55+30,Alien2,45,45,b*55)
+        Alienlist.append(alien)
+ship=PlayerShip(440,610,Ship1,70,70)
+movex='left'
+movey=15
+level=1
+levels=1
+count=0
+star=time.time()
 while True:
-    pygame.time.wait(20)
-    pygame.display.update()
-    screen.fill(black)
-
-
-##    space.move()
-##    space.draw()
-    
+    screen.fill((0,0,0))
+    ship.draw()
+    ship.move_ship()
+    for s in Alienlist:
+        s.draw()
+        s.move_update()
+##        s.move_alien(movex,movey)
+##        if s.x<0:
+##            movey=movey+15
+##            movex='right'
+##        if s.x>900:
+##            movey=movey+15
+##            movex='left'
+    for a in Alienlist:
+          for b in bulletlist:
+            if b.x in range(a.x,a.x+a.width) and b.y in range(a.y-a.height,a.y):
+                if a in Alienlist:
+                    Alienlist.remove(a)
+                if b in bulletlist:
+                    bulletlist.remove(b)
+            if b.y<0:
+                bulletlist.remove(b)
+    for l in SuperAlienList:
+        for k in bulletlist:
+            if k.x in range(l.x,l.x+l.width) and k.y in range(l.y-l.height,l.y):
+                l.count=l.count-1
+            if l.count<=0:
+                if l in SuperAlienList:
+                    SuperAlienList.remove(l)
+                if k in bulletlist:
+                    bulletlist.remove(k)
+            if k.y<0:
+                if k in bulletlist:
+                    bulletlist.remove(k)
+    for b in bulletlist:
+        b.draw()
+        b.bullet_move()
     for event in pygame.event.get():
-        if event.type == QUIT:
+        if event.type==pygame.QUIT:
             pygame.quit()
             exit()
-        if event.type==KEYDOWN:
-            if event.key==K_LEFT:
-                space.movex = -1
-            if event.key==K_RIGHT:
-                space.movex = 1
-            if event.key==K_SPACE:
-                bullet_list.append(bullet(space.x,570,img4,'up'))
-        if event.type==KEYUP:
-            if event.key==K_LEFT:
-                space.movex = 0
-            if event.key==K_RIGHT:
-                space.movex = 0
-    
-    second = time.time() -start
-    #print(second, start)       
-    if second > 3:
-        movey = 50
-        row +=1
-        step +=.8
-        print(step,movey,step*movey)
-        start = time.time()
-        for i in range(0,1000,100):
-            invader1.append(Alien(i,0,60,60,img3,row))
-        
-
- 
+        if event.type==pygame.KEYDOWN:
+            if event.key==pygame.K_RIGHT:
+                ship.speed=1
+            if event.key==pygame.K_LEFT:
+                ship.speed=-1
+            if event.key==pygame.K_SPACE:
+                bullet=Bullet(ship.x-45,ship.y,Bullets,90,100)
+                bullet2=Bullet(ship.x+15,ship.y,Bullets,90,100)
+                bulletlist.append(bullet)
+                bulletlist.append(bullet2)               
+        if event.type==pygame.KEYUP:
+            if event.key==pygame.K_RIGHT:
+                ship.speed=0
+            if event.key==pygame.K_LEFT:
+                ship.speed=0
+    for l in Alienlist:
+        if ship.x in range(l.x,l.x+l.width) and ship.y in range(l.y-l.height,l.y):
+            print('Game Over')
+            exit
+            break
+    if len(Alienlist)==0 and level==1:
+        level=2
+    if level==2:
+        if time.time()-star>3:
+            Superalien=SuperAlien(0,0,Alien1,100,100)
+            SuperAlienList.append(Superalien)
+            count=count+1
+            star=time.time()
+        for o in SuperAlienList:
+            o.draw()
+            o.move_alien()
+        if count==2:
+            level=3
+            for j in range(0,3,1):
+                for w in range(0,5,1):
+                    alien2=Alien(j*85+30,w*55-35,Alien,45,45,w*55)
+                    Alienlist.append(alien2)
             
-        
-        
-    for x in invader1:
- 
-        x.move()
-      
-        x.movedown(movey,step)
-        x.draw()
+        for e in SuperAlienList:
+            for g in bulletlist:
+                if g.x in range(g.x,g.x+g.width) and g.y in range(g.y-g.height,g.y):
+                    if e in Alienlist:
+                        SuperAlienList.remove(e)
+                    if g in bulletlist:
+                        bulletlist.remove(g)
 
-##        if random.randint(1,3000)==1:
-##            bullet_list.append(bullet(x.x-20,x.y+40,pygame.transform.flip(img4,False,True),'down'))
-##        
-        #x.draw()
+          
+    if level==3:
+        screen.fill((0,0,0))
+        movey=15
+        movex='right'
         
-            
-    
-       
-##        
-##        if x.x <0:
-##            movex1='right'
-##            movey1 += 5
-##            
-##        if x.x >1000:
-##            movex1='left'
-##            movey1 += 5
-##        
-##    for x in invader2:
-##        if random.randint(1,3000)==1:
-##            bullet_list.append(bullet(x.x-20,x.y+40,pygame.transform.flip(img4,False,True),'down'))
-##       
-##        x.draw()
-##        x.move(movex2,movey2)
-##        if x.x <0:
-##            movex2='right'
-##            movey2 += 5
-##            
-##        if x.x >1000:
-##            movex2='left'
-##            movey2 += 5
-##
-##    for x in invader3:
-##        if random.randint(1,3000)==1:
-##            bullet_list.append(bullet(x.x-20,x.y+40,pygame.transform.flip(img4,False,True),'down'))
-##        x.draw()
-##        x.move(movex3,movey3)
-##        if x.x <0:
-##            movex3='right'
-##            movey3 += 5
-##            
-##        if x.x >1000:
-##            movex3='left'
-##            movey3 += 5
-##    
-##        
-##    for b in bullet_list:
-##        if b.m=='down' and b.x in range(space.x-50,space.x+50) and b.y in range(space.y,space.y+50):
-##            print('collision')
-##        
-##        if b.m=='down' and b.y <0:
-##            bullet_list.remove(b)
-##        b.move()
-##        b.draw()
-##        for a in invader1:
-##            if b.m=='up' and b.x in range(a.x-20,a.x+20) and b.y in range(a.y,a.y+50):
-##                if b in bullet_list:
-##                    bullet_list.remove(b)
-##                if a in invader1:
-##                    invader1.remove(a)
-##        for a in invader2:
-##            if b.m=='up' and b.x in range(a.x-20,a.x+20) and b.y in range(a.y,a.y+50):
-##                if b in bullet_list:
-##                    bullet_list.remove(b)
-##                if a in invader2:
-##                    invader2.remove(a)
-##        for a in invader3:
-##            if b.m=='up' and b.x in range(a.x-20,a.x+20) and b.y in range(a.y,a.y+50):
-##                if b in bullet_list:
-##                    bullet_list.remove(b)
-##                if a in invader3:
-##                    invader3.remove(a)
-##
+        for lo in Alienlist2:
+            lo.draw()
+            lo.move_update()
+            #print(movex, movey)
+##            if lo.x<0:
+##                
+##                movey+=15
+##                movex='right'
+##            elif lo.x>900:
+##                movey+=15
+##                movex='left'
+##        for ye in Bullet:
+##            ye.draw()
+##            ye.bullet_move()
+##            bullet=Bullet(alien2.x-45,alien2.y,Bullets,90,100)            
+        for ae in Alienlist2:  
+            for be in bulletlist:
+                if be.x in range(ae.x,ae.x+ae.width) and be.y in range(ae.y-ae.height,ae.y):
+                    if ae in Alienlist:
+                        Alienlist2.remove(ae)
+                    if be in bulletlist:
+                        bulletlist.remove(be)
+                if be.y<0:
+                    bulletlist.remove(be)
+        pygame.display.update()   
+    pygame.display.update()
+
 
 
 
