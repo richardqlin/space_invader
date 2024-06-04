@@ -1,0 +1,399 @@
+       #starting code
+import pygame
+import random
+import time
+
+from pygame.locals import* 
+
+pygame.init()
+pygame.mixer.init()
+
+#screen size
+screen=pygame.display.set_mode((800,800))
+
+#caption
+pygame.display.set_caption("Space Invaders Using Classes")
+
+#color variables
+red=(255,0,0)
+crimson=(220,20,60)
+orange=(255,165,0)
+yellow=(255,255,0)
+green=(0,255,0)
+dark_green=(0,100,0)
+blue=(0,0,255)
+purple=(128,0,128)
+black=(0,0,0)
+white=(255,255,255)
+gray=(64,64,64)
+
+#loading sounds
+#pygame.mixer.music.load("LaserSound.wav")
+
+#special color variables
+gold=(255,215,0)
+silver=(192,192,192)
+bronze=(205,127,50)
+
+#color list
+colors=[red,orange,yellow,green,dark_green,blue,purple]
+
+#loading images
+alien_image=pygame.image.load("Alien1.png")
+alien_image2=pygame.image.load("Alien2.png")
+alien_image3=pygame.image.load("Alien3.png")
+spaceship_image=pygame.image.load("Ship.png")
+bullet_image=pygame.image.load("Bullet.png")
+
+#list for background
+backdrop=[]
+
+#loads the background
+##for p in range(0,6,1):
+##    image=pygame.image.load("/Users/Youtube/Desktop/SpaceInvadersBackground/frame_"+str(p)+"_delay-0.09s.gif")
+##    image=pygame.transform.scale(image,(800,800))
+##    backdrop.append(image)
+
+
+#class Character
+class Character:
+    def __init__(self,x,y,image,length,width):
+        self.x=x
+        self.y=y
+        self.image=image
+        self.length=length
+        self.width=width
+        self.rect=0
+
+    #drawing level 1 alien
+    def draw_alien(self):
+        self.image=pygame.transform.scale(self.image,(self.length,self.width))
+        self.rect=screen.blit(self.image,(self.x,self.y))
+
+    #drawing level 2 alien
+    def draw_alien2(self):
+        self.image=pygame.transform.scale(self.image,(self.length,self.width))
+        self.rect=screen.blit(self.image,(self.x,self.y))
+
+    #drawing level 3 alien
+    def draw_alien3(self):
+        self.image=pygame.transform.scale(self.image,(self.length,self.width))
+        self.rect=screen.blit(self.image,(self.x,self.y))
+
+    #drawing spaceship
+    def draw_spaceship(self):
+        self.image=pygame.transform.scale(self.image,(self.length,self.width))
+        self.rect=screen.blit(self.image,(self.x,self.y))
+
+    #drawing bullet
+    def draw_bullet(self):
+        self.image=pygame.transform.scale(self.image,(self.length,self.width))
+        self.rect=screen.blit(self.image,(self.x,self.y))
+
+#variable for level
+level=1
+
+#subclass Alien
+class Alien(Character):
+    def __init__(self,x,y,image,length,width,level):
+        super().__init__(x,y,image,length,width)
+        self.x=x
+        self.y=y
+        self.image=image
+        self.length=length
+        self.width=width
+        self.speed=1
+        self.level=level
+        self.bullets=3
+        
+    #moving the alien left to right, up and down
+    def move_alien(self):
+        self.x=self.x+self.speed
+        if self.x>760:
+            self.speed=-1
+            self.y=self.y+25
+        if self.x<0:
+            self.speed=1
+            self.y=self.y+25
+
+    #moving the alien left to right, up and down together(2.0)
+    def move_row(self,movex,movey):
+        if movex=='right':
+            self.x+=1
+        if movex=='left':
+            self.x-=1
+        self.y=movey+self.level
+
+#subsubclass SuperAlien
+class SuperAlien(Character):
+    def __init__(self,x,y,image,length,width):
+        super().__init__(x,y,image,length,width)
+        self.x=x
+        self.y=y
+        self.image=image
+        self.length=length
+        self.width=width
+        self.superspeed=3
+
+    #moving lvl 2 alien from left to right all the way down
+    def move_alien2(self):
+        self.x=self.x+self.superspeed
+        if self.x>=760:
+            self.superspeed=-5
+            self.y=self.y+25
+        if self.x<=0:
+            self.superspeed=5
+            self.y=self.y+25
+
+#subsubsubclass ShooterAlien
+class ShooterAlien(SuperAlien):
+    def __init__(self,x,y,image,length,width):
+        super().__init__(x,y,image,length,width)
+        self.x=x
+        self.y=y
+        self.image=image
+        self.length=length
+        self.width=width
+        self.count = 0
+        self.direction = 1
+
+    def move(self):
+        self.x += self.direction
+        self.count += 1
+        if abs(self.count) > 65:
+            self.direction *= -1
+            self.count *= self.direction
+            self.y += 20
+        
+        
+
+#subclass PlayerShip
+class PlayerShip(Character):
+    def __init__(self,x,y,image,length,width):
+        super().__init__(x,y,image,length,width)
+        self.x=x
+        self.y=y
+        self.image=image
+        self.length=length
+        self.width=width
+
+    #moving the spaceship to the right
+    def move_shipright(self,movex):
+        self.x=self.x+20
+        #if the ship moves out of the screen(right), then send the ship back to the middle
+        if self.x>=760:
+            self.x=400
+
+    #moving the spaceship to the left
+    def move_shipleft(self,movex):
+        self.x=self.x-20
+        #if the ship moves out of the screen(left), then send the ship back to the middle
+        if self.x<=0:
+            self.x=400
+
+
+
+#subclass Bullet
+class Bullet(Character):
+    def __init__(self,x,y,image,length,width):
+        super().__init__(x,y,image,length,width)
+        self.x=x
+        self.y=y
+        self.image=image
+        self.length=length
+        self.width=width
+        self.bullets=3
+
+    #making the bullet move
+    def move_bullet(self):
+        #bullet speed
+        self.y=self.y-8
+
+    def check(self):
+        #if the bullets collide with lvl 1 aliens remove bullet and alien
+        for a in alien_list:
+            if a.rect.colliderect(self.rect):
+                if b in bulletlist:
+                    bulletlist.remove(b)
+                alien_list.remove(a)
+                #pygame.mixer.music.play()
+                
+        #makes the bullets take 3 hits for the super aliens to die
+        for m in superalienlist:
+            if m.rect.colliderect(self.rect):
+                self.bullets=self.bullets-1
+            if self.bullets<=0:
+                if b in bulletlist:
+                    bulletlist.remove(b)
+                      
+#allows user to draw text when they call the function
+def show_text(msg,x,y,color):
+    fontobj=pygame.font.SysFont("freesans",32)
+    msgobj=fontobj.render(msg,False,color)
+    screen.blit(msgobj,(x,y))
+    
+        
+#variables
+alien_list=[]
+row=2
+movey=10
+movex='left'
+bulletlist=[]
+empty=0
+shooteralien_list=[]
+
+#drawing the aliens(level 1)
+for y in range(5):
+    for s in range(5):
+        a=Alien(310+s*70,25+y*50,alien_image,40,40,y*40)
+        alien_list.append(a)
+
+for y in range(5):
+    for o in range(10):
+        c = ShooterAlien(50+o*70,50+y*50,alien_image,40,40)
+        shooteralien_list.append(c)
+
+#object spaceship
+s=PlayerShip(390,700,spaceship_image,50,50)
+
+game_over=False
+count=0
+
+start=time.time()
+superalienlist=[]
+counter=0
+level=1
+
+while True:
+    #makes it so the image doesn't smudge
+    screen.fill(black)
+
+    #loads the background image repeating
+##    screen.blit(backdrop[count],(0,0))
+##    count=count+1
+##    if count==5:
+##        count=0
+
+    #if all aliens are dead, move onto level 2
+    if len(alien_list)==0 and level==1:
+        level=2
+        show_text("Moving on to level 2!",300,400,green)
+
+    #when it is level 2 draw level 2 aliens
+    if level==2:
+        #screen.blit(backdrop[count],(0,0))
+        count=count+1
+        if count==5:
+            count=0
+        
+        #draws a lvl 2 alien every 3 seconds
+        if time.time()-start>3:
+            superalien=SuperAlien(0,0,alien_image2,50,50)
+            superalienlist.append(superalien)
+            start=time.time()
+            counter=counter+1
+
+        #calling lvl 2 alien stuff
+        for v in superalienlist:
+            v.draw_alien2()
+            v.move_alien2()
+        if counter>=3:
+            level=level+1
+
+    #when it is level 3 draw level 3 aliens
+    if level==3:
+        superalienlist=[]
+        start=0
+        alienlist=[1,2,3]
+        show_text("Moving on to Level 3!", 380,400,green)
+        for k in shooteralien_list:
+            k.move()
+            k.draw_alien3()
+
+        
+    #allows aliens to move down as a group
+    for a in alien_list:
+        a.draw_alien()
+        a.move_row(movex,movey)
+        if a.x<0:
+            movey+=20
+            movex='right'
+        if a.x>760:
+            movey+=20
+            movex='left'
+            
+        #if an alien collides with the ship, game over!
+        if a.x in range(s.x-20,s.x+20) and a.y in range(s.y-20,s.y+20):
+            show_text("Game Over!",400,400,red)
+            pygame.display.update()
+            time.sleep(1)
+            break
+
+    #collision with bullet and alien
+    for a in alien_list:
+        for b in bulletlist:
+            if b.y<=0:
+                bulletlist.remove(b)
+
+    #collision with bullet and lvl 2 alien
+    for m in superalienlist:
+        for b in bulletlist:
+            #if a bullet hits a lvl 2 alien, remove the bullet and lvl 2 alien
+            if m.x in range(b.x-20,b.x+20) and m.y in range(b.y-20,b.y+20):
+                bulletlist.remove(b)
+                superalienlist.remove(m)
+                #plays sound effect when alien dies
+                #pygame.mixer.music.play()
+            #if the bullet reaches the top of the screen, delete the bullet
+            if b.y<=0:
+                bulletlist.remove(b)
+
+        #if a lvl 2 alien crashes into player ship, game over
+        if m.x in range(s.x-20,s.x+20) and m.y in range(s.y-20,s.y+20):
+            show_text("Game Over!", 400,400,red)
+            pygame.display.update()
+            time.sleep(1)
+            break
+        
+    
+    #calling stuff
+    for b in bulletlist:
+        b.draw_bullet()
+        b.move_bullet()
+        b.check()
+
+    #drawing the spaceship
+    s.draw_spaceship()
+
+    #end code
+    for event in pygame.event.get():
+        if event.type==pygame.KEYDOWN:
+            #if the player presses [A], move the ship to the left
+            if event.key==K_a:
+                s.move_shipleft(movex)
+
+            #if the player presses [D], move the ship to the right
+            if event.key==K_d:
+                s.move_shipright(movex)
+
+        if event.type==pygame.KEYUP:
+            #if the player presses SPACE, make the ship shoot bullets
+            if event.key==K_SPACE:
+                b=Bullet(s.x+20,s.y-15,bullet_image,50,100)
+                bulletlist.append(b)
+                
+
+        #end code
+        if event.type==pygame.QUIT:
+            pygame.quit()
+            exit()
+            
+    pygame.display.update()
+
+
+
+
+
+
+
+
